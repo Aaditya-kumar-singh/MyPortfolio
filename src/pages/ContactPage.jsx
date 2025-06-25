@@ -16,7 +16,7 @@ export const ContactPage = () => {
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/send', {
+      const response = await fetch('https://myportfolio-backend-1gm2.onrender.com/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
