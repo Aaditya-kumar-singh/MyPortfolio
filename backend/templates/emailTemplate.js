@@ -48,4 +48,4 @@ const emailHtml = `
 </html>
 `;
 
-export default emailHtml;
+module.exports = emailHtml;

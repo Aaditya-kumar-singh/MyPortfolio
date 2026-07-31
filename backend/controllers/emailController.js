@@ -1,11 +1,10 @@
-
 const nodemailer = require('nodemailer');
 const emailHtml = require('../templates/emailTemplate.js');
 const dotenv = require('dotenv');
 
 dotenv.config();
 
-export const sendEmail = async (req, res) => {
+const sendEmail = async (req, res) => {
   const { email, subject, message } = req.body;
 
   const filledTemplate = emailHtml
@@ -23,8 +22,9 @@ export const sendEmail = async (req, res) => {
 
   const mailOptions = {
     from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_RECEIVER,
-    subject: '📬 New Message from Portfolio Contact Form',
+    replyTo: email,
+    to: process.env.EMAIL_USER,
+    subject: `📬 New Message from Portfolio Contact Form: ${subject}`,
     html: filledTemplate,
   };
 
@@ -35,4 +35,8 @@ export const sendEmail = async (req, res) => {
     console.error('Error sending email:', error);
     res.status(500).json({ success: false, message: '❌ Failed to send message.' });
   }
+};
+
+module.exports = {
+  sendEmail
 };
