@@ -25,3 +25,7 @@ out/
 # OS metadata files
 .DS_Store
 Thumbs.db
+
+# Local MCP change-set backups and temporary trash
+.mcp-backups/
+.mcp-trash/

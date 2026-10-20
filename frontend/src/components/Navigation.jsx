@@ -3,16 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu,
   X,
-  Github,
-  Linkedin,
-  Mail,
-  ExternalLink,
-  Code,
+  Home,
   User,
+  Code,
   Briefcase,
   MessageSquare,
-  Home,
-  Sparkles,
+  PencilRuler,
 } from "lucide-react";
 
 const Navigation = ({
@@ -27,7 +23,8 @@ const Navigation = ({
     { id: "home", label: "Home", icon: Home },
     { id: "about", label: "About", icon: User },
     { id: "projects", label: "Projects", icon: Code },
-    { id: "experience", label: "Certifications", icon: Briefcase },
+    { id: "sketchbook", label: "Sketchbook", icon: PencilRuler },
+    { id: "experience", label: "Experience", icon: Briefcase },
     { id: "contact", label: "Contact", icon: MessageSquare },
   ];
 
@@ -35,7 +32,7 @@ const Navigation = ({
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -46,68 +43,66 @@ const Navigation = ({
       transition={{ duration: 0.8, ease: "easeOut" }}
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 shadow-lg"
+          ? "surface-glass shadow-lg"
           : "bg-transparent"
       }`}
+      role="navigation"
+      aria-label="Main navigation"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          {/* Logo */}
-          <motion.div
-            className="flex items-center"
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+      <div className="max-w-content mx-auto px-6 md:px-12 lg:px-16">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo — AK Monogram */}
+          <motion.button type="button" aria-label="Go to home"
+            className="flex items-center gap-3 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300"
+            whileHover={{ scale: 1.03 }}
+            transition={{ type: "spring", stiffness: 400, damping: 15 }}
+            onClick={() => setCurrentPage("home")}
           >
-            <div className="flex items-center space-x-2">
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center"
-              >
-                <Sparkles size={16} className="text-white" />
-              </motion.div>
-              <span className="text-2xl font-bold gradient-text">Aaditya</span>
+            <div className="w-9 h-9 bg-gradient-accent rounded-lg flex items-center justify-center">
+              <span className="font-display text-sm font-bold text-bg-primary">AK</span>
             </div>
-          </motion.div>
+            <span className="text-xl font-display font-bold gradient-text hidden sm:inline">
+              Aaditya
+            </span>
+          </motion.button>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
+          <div className="hidden md:flex items-center gap-1">
             {navItems.map(({ id, label }, index) => (
               <motion.button
                 key={id}
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1, duration: 0.5 }}
-                onClick={() => setCurrentPage(id)}
-                className={`relative px-4 py-2 rounded-lg transition-all duration-300 group ${
+                transition={{ delay: index * 0.08, duration: 0.4 }}
+                type="button" onClick={() => setCurrentPage(id)} aria-current={currentPage === id ? "page" : undefined}
+                className={`relative px-4 py-2 rounded-lg text-body-sm font-medium transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300 ${
                   currentPage === id
-                    ? "text-orange-500"
-                    : "text-gray-300 hover:text-orange-400"
+                    ? "text-accent"
+                    : "text-text-secondary hover:text-text-primary"
                 }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
               >
                 {label}
                 {currentPage === id && (
                   <motion.div
-                    layoutId="activeTab"
-                    className="absolute inset-0 bg-orange-500/10 rounded-lg border border-orange-500/20"
+                    layoutId="activeNavIndicator"
+                    className="absolute bottom-0 left-2 right-2 h-0.5 bg-accent rounded-full"
                     initial={false}
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                   />
                 )}
-                <div className="absolute inset-0 bg-orange-500/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </motion.button>
             ))}
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden">
             <motion.button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-gray-400 hover:text-white p-2"
-              whileHover={{ scale: 1.1 }}
+              className="text-text-secondary hover:text-text-primary p-2"
               whileTap={{ scale: 0.9 }}
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-menu"
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             >
               <AnimatePresence mode="wait">
                 {isMobileMenuOpen ? (
@@ -116,7 +111,7 @@ const Navigation = ({
                     initial={{ rotate: -90, opacity: 0 }}
                     animate={{ rotate: 0, opacity: 1 }}
                     exit={{ rotate: 90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
+                    transition={{ duration: 0.15 }}
                   >
                     <X size={24} />
                   </motion.div>
@@ -126,7 +121,7 @@ const Navigation = ({
                     initial={{ rotate: 90, opacity: 0 }}
                     animate={{ rotate: 0, opacity: 1 }}
                     exit={{ rotate: -90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
+                    transition={{ duration: 0.15 }}
                   >
                     <Menu size={24} />
                   </motion.div>
@@ -141,33 +136,32 @@ const Navigation = ({
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
+            id="mobile-menu"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="md:hidden bg-gray-900/95 backdrop-blur-md border-t border-gray-800/50"
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="md:hidden surface-glass border-t border-border-default"
           >
-            <div className="px-4 py-4 space-y-2">
+            <div className="px-6 py-4 space-y-1">
               {navItems.map(({ id, label, icon: Icon }, index) => (
                 <motion.button
                   key={id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1, duration: 0.3 }}
+                  transition={{ delay: index * 0.06, duration: 0.25 }}
                   onClick={() => {
                     setCurrentPage(id);
                     setIsMobileMenuOpen(false);
                   }}
-                  className={`w-full flex items-center px-4 py-3 rounded-lg text-left transition-all duration-300 group ${
+                  className={`w-full flex items-center px-4 py-3 rounded-lg text-left transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300 ${
                     currentPage === id
-                      ? "text-orange-500 bg-orange-500/10 border border-orange-500/20"
-                      : "text-gray-300 hover:text-orange-400 hover:bg-orange-500/5"
+                      ? "text-accent bg-accent/10 border-l-2 border-accent"
+                      : "text-text-secondary hover:text-text-primary hover:bg-white/5"
                   }`}
-                  whileHover={{ x: 5 }}
-                  whileTap={{ scale: 0.98 }}
                 >
-                  <Icon size={20} className="mr-3" />
-                  {label}
+                  <Icon size={20} className="mr-3 flex-shrink-0" />
+                  <span className="font-medium">{label}</span>
                 </motion.button>
               ))}
             </div>

@@ -20,7 +20,7 @@ const emailHtml = `
       margin: auto;
     }
     h2 {
-      color: #ff6600;
+      color: #06B6D4;
     }
     p {
       line-height: 1.6;
@@ -35,10 +35,10 @@ const emailHtml = `
 </head>
 <body>
   <div class="container">
-    <h2>📬 New Message from Portfolio Contact Form</h2>
-    <p><strong>📧 Email:</strong> {{email}}</p>
-    <p><strong>📝 Subject:</strong> {{subject}}</p>
-    <p><strong>💬 Message:</strong></p>
+    <h2>New Portfolio Contact Message</h2>
+    <p><strong>Email address:</strong> {{email}}</p>
+    <p><strong>Subject:</strong> {{subject}}</p>
+    <p><strong>Message:</strong></p>
     <p>{{message}}</p>
     <div class="footer">
       <p>This message was sent from your portfolio website.</p>

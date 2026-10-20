@@ -23,7 +23,11 @@ export default [
     rules: {
       ...js.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // The base ESLint rule does not count JSX member expressions as reads.
+      'no-unused-vars': ['error', {
+        varsIgnorePattern: '^[A-Z_]|^motion$',
+        argsIgnorePattern: '^(Icon|index)$',
+      }],
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },

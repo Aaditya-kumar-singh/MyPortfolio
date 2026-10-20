@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import { motion, useAnimation, useInView } from "framer-motion";
+import { motion, useAnimation, useInView, useReducedMotion } from "framer-motion";
 import {
   ExternalLink,
   Award,
@@ -14,77 +14,38 @@ import {
   Database,
   Globe,
 } from "lucide-react";
-import { gsap } from "gsap";
 
 const ExperiencePage = () => {
   const experienceRef = useRef(null);
   const controls = useAnimation();
+  const reduceMotion = useReducedMotion();
   const isInView = useInView(experienceRef, { once: true, margin: "-100px" });
 
   useEffect(() => {
-    if (isInView) {
+    if (isInView || reduceMotion) {
       controls.start("visible");
     }
-  }, [controls, isInView]);
+  }, [controls, isInView, reduceMotion]);
 
-  useEffect(() => {
-    // GSAP animation for certification cards
-    gsap.fromTo(
-      ".cert-card",
-      {
-        y: 60,
-        opacity: 0,
-        scale: 0.95,
-        rotateX: 10,
-      },
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        rotateX: 0,
-        duration: 0.8,
-        ease: "power2.out",
-        stagger: 0.15,
-        delay: 0.3,
-      }
-    );
-
-    // Timeline animation
-    gsap.fromTo(
-      ".timeline-item",
-      {
-        x: -50,
-        opacity: 0,
-      },
-      {
-        x: 0,
-        opacity: 1,
-        duration: 0.6,
-        ease: "power2.out",
-        stagger: 0.2,
-        delay: 0.5,
-      }
-    );
-  }, [isInView]);
 
   const containerVariants = {
-    hidden: { opacity: 0 },
+    hidden: { opacity: reduceMotion ? 1 : 0 },
     visible: {
       opacity: 1,
       transition: {
-        delayChildren: 0.2,
-        staggerChildren: 0.1,
+        delayChildren: reduceMotion ? 0 : 0.2,
+        staggerChildren: reduceMotion ? 0 : 0.1,
       },
     },
   };
 
   const itemVariants = {
-    hidden: { y: 30, opacity: 0 },
+    hidden: { y: reduceMotion ? 0 : 30, opacity: reduceMotion ? 1 : 0 },
     visible: {
       y: 0,
       opacity: 1,
       transition: {
-        duration: 0.8,
+        duration: reduceMotion ? 0 : 0.8,
         ease: "easeOut",
       },
     },
@@ -128,7 +89,7 @@ const ExperiencePage = () => {
       featured: true,
       skills: ["JavaScript", "ES6+", "DOM", "Async/Await"],
       icon: Code,
-      color: "from-yellow-500 to-orange-500",
+      color: "from-yellow-500 to-cyan-500",
     },
     {
       title: "Python for Beginners to Advanced",
@@ -175,13 +136,6 @@ const ExperiencePage = () => {
     }
   ];
 
-  const stats = [
-    { number: "4+", label: "Certifications", icon: Award },
-    { number: "100%", label: "Completion Rate", icon: Trophy },
-    { number: "2+", label: "Years Learning", icon: Calendar },
-    { number: "15+", label: "Skills Acquired", icon: Star },
-  ];
-
   const getStatusIcon = (status) => {
     switch (status) {
       case "completed":
@@ -207,7 +161,7 @@ const ExperiencePage = () => {
   return (
     <div
       ref={experienceRef}
-      className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-20"
+      className="experience-page-redesign min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-20"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
@@ -219,18 +173,18 @@ const ExperiencePage = () => {
         >
           <motion.div
             variants={itemVariants}
-            className="inline-flex items-center px-4 py-2 bg-orange-500/10 border border-orange-500/20 rounded-full text-orange-400 text-sm font-medium backdrop-blur-sm mb-6"
+            className="inline-flex items-center px-4 py-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full text-cyan-400 text-sm font-medium backdrop-blur-sm mb-6"
           >
             <GraduationCap size={16} className="mr-2" />
             Continuous learning journey
           </motion.div>
 
-          <motion.h1
+          <motion.h2
             variants={itemVariants}
             className="text-5xl md:text-6xl font-bold mb-6"
           >
             Certifications & <span className="gradient-text">Experience</span>
-          </motion.h1>
+          </motion.h2>
 
           <motion.p
             variants={itemVariants}
@@ -240,35 +194,15 @@ const ExperiencePage = () => {
             development through various certifications and hands-on experience.
           </motion.p>
 
-          {/* Stats */}
-          <motion.div
-            variants={itemVariants}
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16"
-          >
-            {stats.map(({ number, label, icon: Icon }, index) => (
-              <motion.div
-                key={label}
-                className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 text-center group hover:border-orange-500/50 transition-all duration-300"
-                whileHover={{ scale: 1.05, y: -5 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-              >
-                <Icon size={24} className="text-orange-400 mx-auto mb-3" />
-                <div className="text-2xl font-bold text-white mb-1">
-                  {number}
-                </div>
-                <div className="text-sm text-gray-400">{label}</div>
-              </motion.div>
-            ))}
-          </motion.div>
         </motion.div>
 
         {/* Certifications Grid */}
-        <div className="space-y-8 mb-16">
+        <div id="certificates-grid" className="space-y-8 mb-16">
           {certifications.map((cert, index) => (
             <motion.div
               key={index}
-              className={`cert-card group relative bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl overflow-hidden hover:border-orange-500/50 transition-all duration-500 ${
-                cert.featured ? "ring-2 ring-orange-500/20" : ""
+              className={`cert-card group relative bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl overflow-hidden hover:border-cyan-500/50 transition-all duration-500 ${
+                cert.featured ? "ring-2 ring-cyan-500/20" : ""
               }`}
               whileHover={{ scale: 1.01, y: -5 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
@@ -286,11 +220,11 @@ const ExperiencePage = () => {
 
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
-                          <h3 className="text-2xl font-bold text-white group-hover:text-orange-400 transition-colors">
+                          <h3 className="text-2xl font-bold text-white group-hover:text-cyan-400 transition-colors">
                             {cert.title}
                           </h3>
                           {cert.featured && (
-                            <span className="px-2 py-1 bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-full text-xs font-medium">
+                            <span className="px-2 py-1 bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-full text-xs font-medium">
                               <Star size={12} className="inline mr-1" />
                               Featured
                             </span>
@@ -298,7 +232,7 @@ const ExperiencePage = () => {
                         </div>
 
                         <div className="flex items-center space-x-4 text-sm">
-                          <span className="text-orange-500 font-semibold">
+                          <span className="text-cyan-500 font-semibold">
                             {cert.issuer}
                           </span>
                           <span className="text-gray-400 flex items-center">
@@ -318,7 +252,7 @@ const ExperiencePage = () => {
                       {cert.skills.map((skill, skillIndex) => (
                         <motion.span
                           key={skill}
-                          className="px-3 py-1 bg-gray-700/50 text-gray-300 text-sm rounded-full border border-gray-600/50 hover:border-orange-500/50 hover:text-orange-400 transition-all duration-300"
+                          className="px-3 py-1 bg-gray-700/50 text-gray-300 text-sm rounded-full border border-gray-600/50 hover:border-cyan-500/50 hover:text-cyan-400 transition-all duration-300"
                           whileHover={{ scale: 1.05 }}
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
@@ -345,26 +279,20 @@ const ExperiencePage = () => {
                       </span>
                     </div>
 
-                    <motion.a
-                      href={cert.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 rounded-xl text-orange-400 font-medium hover:bg-gradient-to-r hover:from-orange-500/30 hover:to-red-500/30 transition-all duration-300 group/btn"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <span>View Certificate</span>
-                      <ExternalLink
-                        size={16}
-                        className="ml-2 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform"
-                      />
-                    </motion.a>
+                    {cert.link && cert.link !== "#" && cert.status === "completed" ? (
+                      <motion.a href={cert.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-500/20 to-violet-500/20 border border-cyan-500/30 rounded-xl text-cyan-300 font-medium hover:bg-cyan-500/10 transition-colors duration-200 group/btn" whileHover={{ y: -1 }} whileTap={{ scale: 0.99 }}>
+                        <span>View Certificate</span>
+                        <ExternalLink size={16} className="ml-2" />
+                      </motion.a>
+                    ) : (
+                      <span className="px-4 py-3 text-sm text-gray-400">Certificate pending completion</span>
+                    )}
                   </div>
                 </div>
               </div>
 
               {/* Hover Glow Effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-violet-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
             </motion.div>
           ))}
         </div>
@@ -385,7 +313,7 @@ const ExperiencePage = () => {
 
           <div className="relative">
             {/* Timeline Line */}
-            <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-orange-500 to-red-500"></div>
+            <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-cyan-500 to-violet-500"></div>
 
             <div className="space-y-8">
               {timelineData.map((item, index) => (
@@ -398,16 +326,16 @@ const ExperiencePage = () => {
                     <item.icon size={24} className="text-white" />
                   </div>
 
-                  <div className="flex-1 bg-gray-800/30 backdrop-blur-sm border border-gray-700/30 rounded-xl p-6 hover:border-orange-500/50 transition-colors duration-300">
+                  <div className="flex-1 bg-gray-800/30 backdrop-blur-sm border border-gray-700/30 rounded-xl p-6 hover:border-cyan-500/50 transition-colors duration-300">
                     <div className="flex flex-col sm:flex-row justify-between items-start mb-2">
                       <h3 className="text-xl font-semibold text-white">
                         {item.title}
                       </h3>
-                      <span className="px-3 py-1 bg-gray-700/50 text-orange-400 text-xs rounded-full border border-gray-600/50 mt-2 sm:mt-0">
+                      <span className="px-3 py-1 bg-gray-700/50 text-cyan-400 text-xs rounded-full border border-gray-600/50 mt-2 sm:mt-0">
                         {item.type}
                       </span>
                     </div>
-                    <p className="text-orange-400 font-medium mb-2">
+                    <p className="text-cyan-400 font-medium mb-2">
                       {item.organization}
                     </p>
                     <p className="text-gray-400 text-sm mb-3 flex items-center">
@@ -437,7 +365,7 @@ const ExperiencePage = () => {
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
             <motion.button
-              className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 rounded-full text-white font-semibold shadow-glow hover:shadow-glow-lg transition-all duration-300"
+              className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-violet-500 rounded-full text-white font-semibold shadow-glow hover:shadow-glow-lg transition-all duration-300" onClick={() => document.getElementById("certificates-grid")?.scrollIntoView({ behavior: "smooth", block: "start" })}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -447,7 +375,7 @@ const ExperiencePage = () => {
             <motion.a
               href="/resume.pdf"
               download
-              className="px-8 py-4 border border-orange-500/50 rounded-full text-orange-400 font-semibold hover:bg-orange-500/10 transition-all duration-300 inline-block"
+              className="px-8 py-4 border border-cyan-500/50 rounded-full text-cyan-400 font-semibold hover:bg-cyan-500/10 transition-all duration-300 inline-block"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >

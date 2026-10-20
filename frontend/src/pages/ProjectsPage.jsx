@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useState } from "react";
-import { motion, useAnimation, useInView } from "framer-motion";
+import React, { useRef, useEffect } from "react";
+import { motion, useAnimation, useInView, useReducedMotion } from "framer-motion";
 import {
   Github,
   ExternalLink,
@@ -10,109 +10,28 @@ import {
   Eye,
   ArrowUpRight,
 } from "lucide-react";
-import { gsap } from "gsap";
 
-const ProjectSkeleton = () => {
-  return (
-    <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl overflow-hidden relative p-0">
-      {/* Image shimmer */}
-      <div className="h-48 shimmer" />
-
-      {/* Content */}
-      <div className="p-6 space-y-4">
-        {/* Title */}
-        <div className="h-6 w-2/3 shimmer rounded" />
-
-        {/* Description */}
-        <div className="space-y-2">
-          <div className="h-4 w-full shimmer rounded" />
-          <div className="h-4 w-5/6 shimmer rounded" />
-        </div>
-
-        {/* Tech tags */}
-        <div className="flex flex-wrap gap-2 pt-2">
-          <div className="h-6 w-16 shimmer rounded-full" />
-          <div className="h-6 w-12 shimmer rounded-full" />
-          <div className="h-6 w-20 shimmer rounded-full" />
-        </div>
-
-        {/* Actions */}
-        <div className="flex justify-between items-center pt-4">
-          <div className="flex space-x-4">
-            <div className="h-5 w-12 shimmer rounded" />
-            <div className="h-5 w-12 shimmer rounded" />
-          </div>
-          <div className="h-9 w-24 shimmer rounded-lg" />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const ProjectsPage = () => {
+const ProjectsPage = ({ onNavigate }) => {
   const projectsRef = useRef(null);
   const controls = useAnimation();
+  const reduceMotion = useReducedMotion();
   const isInView = useInView(projectsRef, { once: true, margin: "-100px" });
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (isInView) {
-      controls.start("visible");
-    }
-  }, [controls, isInView]);
-
-  useEffect(() => {
-    if (!isLoading && isInView) {
-      // GSAP animation for project cards once loading completes
-      gsap.fromTo(
-        ".project-card",
-        {
-          y: 60,
-          opacity: 0,
-          scale: 0.9,
-          rotateX: 15,
-        },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          rotateX: 0,
-          duration: 0.8,
-          ease: "power2.out",
-          stagger: 0.15,
-        }
-      );
-    }
-  }, [isInView, isLoading]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
+    if (isInView || reduceMotion) controls.start("visible");
+  }, [controls, isInView, reduceMotion]);
 
   const containerVariants = {
-    hidden: { opacity: 0 },
+    hidden: { opacity: reduceMotion ? 1 : 0 },
     visible: {
       opacity: 1,
-      transition: {
-        delayChildren: 0.2,
-        staggerChildren: 0.1,
-      },
+      transition: { delayChildren: reduceMotion ? 0 : 0.12, staggerChildren: reduceMotion ? 0 : 0.1 },
     },
   };
 
   const itemVariants = {
-    hidden: { y: 30, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut",
-      },
-    },
+    hidden: { y: reduceMotion ? 0 : 24, opacity: reduceMotion ? 1 : 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: reduceMotion ? 0 : 0.62, ease: [0.22, 1, 0.36, 1] } },
   };
 
   const projects = [
@@ -121,12 +40,12 @@ const ProjectsPage = () => {
       description:
         "A full-stack digital marketplace where users can browse, purchase, and securely download CNC design files. Features include Razorpay payment integration, protected file delivery, Cloudinary previews, and Cloudflare R2 storage.",
       tech: ["Next.js", "Node.js", "Cloudflare R2", "Razorpay", "Cloudinary"],
-      image: "bg-gradient-to-br from-orange-500 to-red-600",
-      github: "#",
+      image: "bg-gradient-to-br from-cyan-500 to-violet-600",
+      github: null,
       demo: "https://cncmarket.in",
       status: "Completed",
       featured: true,
-      gradient: "from-orange-500 to-red-600",
+      gradient: "from-cyan-500 to-violet-600",
     },
     {
       title: "SchemaFlow",
@@ -147,7 +66,7 @@ const ProjectsPage = () => {
       tech: ["React", "Vite", "Node.js", "MongoDB", "Socket.io"],
       image: "/TypingTest.png",
       github: "https://github.com/Aaditya-kumar-singh/TypingTestWebsite",
-      demo: "#",
+      demo: null,
       status: "In Progress",
       featured: true,
       gradient: "from-purple-500 to-pink-600",
@@ -158,7 +77,7 @@ const ProjectsPage = () => {
         "A business website developed for RudraShield Pest Management to establish its online presence, showcase its pest-management services, and connect clients with service bookings.",
       tech: ["HTML5", "CSS3", "JavaScript", "Tailwind CSS"],
       image: "bg-gradient-to-br from-emerald-500 to-teal-600",
-      github: "#",
+      github: null,
       demo: "https://www.rudrashieldpestmanagement.in/",
       status: "Completed",
       featured: false,
@@ -181,29 +100,21 @@ const ProjectsPage = () => {
       description:
         "A command-line web security scanner designed to identify common web application vulnerabilities (like SQL injection and XSS), perform directory crawling, and run security header analysis.",
       tech: ["Python", "Web Crawling", "Security Headers", "Vulnerability Auditing"],
-      image: "bg-gradient-to-br from-red-600 to-rose-800",
-      github: "#",
-      demo: "#",
+      image: "bg-gradient-to-br from-violet-600 to-rose-800",
+      github: null,
+      demo: null,
       status: "Completed",
       featured: false,
-      gradient: "from-red-600 to-rose-800",
+      gradient: "from-violet-600 to-rose-800",
     },
-  ];
-
-  const stats = [
-    { number: "15+", label: "Projects Built", icon: Code },
-    { number: "4", label: "Featured Works", icon: Star },
-    { number: "2+", label: "Years Experience", icon: Calendar },
-    { number: "1000+", label: "Code Commits", icon: Github },
   ];
 
   return (
     <div
       ref={projectsRef}
-      className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-20"
+      className="projects-page-redesign min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-20"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header Section */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -212,103 +123,64 @@ const ProjectsPage = () => {
         >
           <motion.div
             variants={itemVariants}
-            className="inline-flex items-center px-4 py-2 bg-orange-500/10 border border-orange-500/20 rounded-full text-orange-400 text-sm font-medium backdrop-blur-sm mb-6"
+            className="inline-flex items-center px-4 py-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full text-cyan-400 text-sm font-medium backdrop-blur-sm mb-6"
           >
             <Rocket size={16} className="mr-2" />
             Showcasing my work
           </motion.div>
 
-          <motion.h1
-            variants={itemVariants}
-            className="text-5xl md:text-6xl font-bold mb-6"
-          >
+          <motion.h2 variants={itemVariants} className="text-5xl md:text-6xl font-bold mb-6">
             Featured <span className="gradient-text">Projects</span>
-          </motion.h1>
+          </motion.h2>
 
-          <motion.p
-            variants={itemVariants}
-            className="text-xl text-gray-400 max-w-3xl mx-auto mb-12"
-          >
+          <motion.p variants={itemVariants} className="text-xl text-gray-400 max-w-3xl mx-auto mb-12">
             A collection of projects that showcase my skills in full-stack
             development, UI/UX design, and problem-solving
           </motion.p>
-
-          {/* Stats */}
-          <motion.div
-            variants={itemVariants}
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16"
-          >
-            {stats.map(({ number, label, icon: Icon }, index) => (
-              <motion.div
-                key={label}
-                className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 text-center group hover:border-orange-500/50 transition-all duration-300"
-                whileHover={{ scale: 1.05, y: -5 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-              >
-                <Icon size={24} className="text-orange-400 mx-auto mb-3" />
-                <div className="text-2xl font-bold text-white mb-1">
-                  {number}
-                </div>
-                <div className="text-sm text-gray-400">{label}</div>
-              </motion.div>
-            ))}
-          </motion.div>
         </motion.div>
 
-        {/* Projects Grid */}
-        <div className="grid md:grid-cols-2 gap-8 mb-16">
-          {isLoading
-            ? Array.from({ length: 6 }).map((_, idx) => (
-                <ProjectSkeleton key={idx} />
-              ))
-            : projects.map((project, index) => (
-            <motion.div
-              key={index}
-              className={`project-card group relative bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl overflow-hidden hover:border-orange-500/50 transition-all duration-500 ${
-                project.featured ? "md:col-span-2 lg:col-span-1" : ""
-              }`}
-              whileHover={{ scale: 1.02, y: -5 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        <motion.div variants={containerVariants} initial="hidden" animate={controls} className="grid md:grid-cols-2 gap-8 mb-16">
+          {projects.map((project, index) => (
+            <motion.article
+              key={project.title}
+              variants={itemVariants}
+              className={`project-card group relative bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl overflow-hidden hover:border-cyan-500/50 transition-colors duration-300 ${project.featured ? "md:col-span-2 lg:col-span-1" : ""}`}
+              whileHover={reduceMotion ? undefined : { y: -3, transition: { duration: 0.22, ease: "easeOut" } }}
+              whileTap={reduceMotion ? undefined : { scale: 0.995 }}
             >
-              {/* Project Image/Gradient */}
               <div className="relative h-48 overflow-hidden">
                 {project.image.startsWith("/") ? (
-                  <div className="relative h-full">
-                    <img
+                  <div className="project-media relative h-full">
+                    <motion.img
                       src={project.image}
-                      alt={project.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      alt={`Screenshot of ${project.title}`}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover"
+                      whileHover={reduceMotion ? undefined : { scale: 1.035 }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent pointer-events-none" />
                   </div>
                 ) : (
-                  <div
-                    className={`h-full ${project.image} flex items-center justify-center relative`}
-                  >
-                    <Code size={48} className="text-white opacity-80 z-10" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent" />
+                  <div className={`h-full ${project.image} flex items-center justify-center relative`}>
+                    <div className="project-placeholder-mark" aria-hidden="true">
+                      <Code size={42} className="text-white/90" />
+                      <span>PROJECT PREVIEW</span>
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent pointer-events-none" />
                   </div>
                 )}
 
-                {/* Status Badge */}
                 <div className="absolute top-4 right-4">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${
-                      project.status === "Completed"
-                        ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                        : "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
-                    }`}
-                  >
-                    {project.status === "Completed"
-                      ? "✓ Completed"
-                      : "⚡ In Progress"}
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${project.status === "Completed" ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"}`}>
+                    {project.status === "Completed" ? "✓ Completed" : "⚡ In Progress"}
                   </span>
                 </div>
 
-                {/* Featured Badge */}
                 {project.featured && (
                   <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-full text-xs font-medium backdrop-blur-sm">
+                    <span className="px-3 py-1 bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-full text-xs font-medium backdrop-blur-sm">
                       <Star size={12} className="inline mr-1" />
                       Featured
                     </span>
@@ -316,136 +188,60 @@ const ProjectsPage = () => {
                 )}
               </div>
 
-              {/* Project Content */}
               <div className="p-6">
                 <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-xl font-bold text-white group-hover:text-orange-400 transition-colors">
+                  <h3 className="text-xl font-bold text-white group-hover:text-cyan-400 transition-colors">
                     {project.title}
                   </h3>
-                  <motion.div
-                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    whileHover={{ scale: 1.1 }}
-                  >
-                    <ArrowUpRight size={20} className="text-orange-400" />
-                  </motion.div>
+                  {project.featured && <Star size={18} className="text-cyan-400 flex-shrink-0" />}
                 </div>
 
-                <p className="text-gray-400 mb-4 text-sm leading-relaxed">
-                  {project.description}
-                </p>
+                <p className="text-gray-400 mb-4 leading-relaxed">{project.description}</p>
 
-                {/* Tech Stack */}
                 <div className="flex flex-wrap gap-2 mb-6">
-                  {project.tech.map((tech, techIndex) => (
-                    <motion.span
-                      key={techIndex}
-                      className="px-3 py-1 bg-gray-700/50 text-gray-300 text-xs rounded-full border border-gray-600/50 hover:border-orange-500/50 hover:text-orange-400 transition-all duration-300"
-                      whileHover={{ scale: 1.05 }}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.1 + techIndex * 0.05 }}
-                    >
+                  {project.tech.map((tech) => (
+                    <span key={tech} className="px-3 py-1 bg-gray-700/50 text-gray-300 rounded-full text-sm border border-gray-600/30">
                       {tech}
-                    </motion.span>
+                    </span>
                   ))}
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex items-center justify-between">
-                  <div className="flex space-x-4">
-                    {project.github && project.github !== "#" && (
-                      <motion.a
-                        href={project.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center text-gray-400 hover:text-orange-400 transition-colors group/link"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Github
-                          size={16}
-                          className="mr-2 group-hover/link:rotate-12 transition-transform"
-                        />
-                        <span className="text-sm font-medium">Code</span>
-                      </motion.a>
-                    )}
-
-                    {project.demo && project.demo !== "#" && (
-                      <motion.a
-                        href={project.demo}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center text-gray-400 hover:text-orange-400 transition-colors group/link"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Eye
-                          size={16}
-                          className="mr-2 group-hover/link:scale-110 transition-transform"
-                        />
-                        <span className="text-sm font-medium">Demo</span>
-                      </motion.a>
-                    )}
-                  </div>
-
-                  <motion.button
-                    className="px-4 py-2 bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 rounded-lg text-orange-400 text-sm font-medium hover:bg-gradient-to-r hover:from-orange-500/30 hover:to-red-500/30 transition-all duration-300"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Learn More
-                  </motion.button>
+                <div className="flex flex-wrap gap-3">
+                  {project.github && (
+                    <a href={project.github} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 min-h-11 rounded-lg bg-gray-700/50 text-white hover:bg-gray-700 transition-colors">
+                      <Github size={16} />
+                      View Code
+                    </a>
+                  )}
+                  {project.demo && (
+                    <a href={project.demo} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 min-h-11 rounded-lg bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 transition-colors">
+                      <ExternalLink size={16} />
+                      Live Demo
+                    </a>
+                  )}
+                  {!project.github && !project.demo && (
+                    <span className="inline-flex items-center gap-2 px-4 py-2 min-h-11 rounded-lg bg-gray-700/30 text-gray-400">
+                      <Eye size={16} />
+                      Private / CLI project
+                    </span>
+                  )}
                 </div>
               </div>
-
-              {/* Hover Glow Effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-            </motion.div>
+            </motion.article>
           ))}
-        </div>
+        </motion.div>
 
-        {/* Call to Action */}
         <motion.div
-          variants={itemVariants}
-          initial="hidden"
-          animate={controls}
+          initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={reduceMotion ? { duration: 0 } : { duration: 0.5 }}
           className="text-center"
         >
-          <motion.div
-            className="inline-flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4"
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 400, damping: 10 }}
-          >
-            <motion.button
-              className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 rounded-full text-white font-semibold shadow-glow hover:shadow-glow-lg transition-all duration-300"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              View All Projects
-            </motion.button>
-
-            <motion.button
-              className="px-8 py-4 border border-orange-500/50 rounded-full text-orange-400 font-semibold hover:bg-orange-500/10 transition-all duration-300"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Hire Me
-            </motion.button>
-          </motion.div>
-
-          <motion.p
-            variants={itemVariants}
-            className="mt-8 text-gray-500 text-sm"
-          >
-            Want to see more? Check out my{" "}
-            <a
-              href="https://github.com/Aaditya-kumar-singh"
-              className="text-orange-400 hover:text-orange-300 transition-colors"
-            >
-              GitHub profile
-            </a>{" "}
-            for additional projects and contributions.
-          </motion.p>
+          <p className="text-gray-400 mb-6">Want to explore more of my work?</p>
+          <motion.button type="button" whileHover={reduceMotion ? undefined : { y: -2 }} whileTap={reduceMotion ? undefined : { scale: 0.99 }} onClick={() => onNavigate?.("contact")} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-cyan-500/30 px-6 py-3 text-cyan-300 hover:bg-cyan-500/10 transition-colors">
+            Let&apos;s Connect <ArrowUpRight size={16} />
+          </motion.button>
         </motion.div>
       </div>
     </div>
